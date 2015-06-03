@@ -12,7 +12,6 @@
     "sdkVersion": "3",
     "shortName": "AgeOfExpidition",
     "uuid": "7dfe9120-c365-4111-ae32-4ad43806c04f",
-    "versionCode": 1,
     "versionLabel": "1.0",
     "watchapp": {
         "watchface": false

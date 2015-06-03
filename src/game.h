@@ -1,3 +1,4 @@
 #pragma once
+#include "types.h"
 
-void game_tick(gamedata* gamedata);
+void game_tick(GameData* gamedata);
