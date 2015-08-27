@@ -1,11 +1,25 @@
 #include <pebble.h>
 #include "types.h"
-  
+#include "menus.h"
+#include "game.h"
+
 static Window *window;
 static TextLayer *text_layer;
+static GameData gamedata;
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Select");
+  static char characterarray[200];
+  snprintf(characterarray, sizeof(characterarray), 
+           "Newplanets is %i \nPlanetnumber is %i \ncurrentstations is %i \nplayermetal is %i \nplanetfleet is %i \nplanet ship 1 hp %i", 
+           gamedata.numberofnewplanets, 
+           gamedata.currentplanet.planetnumber,
+           gamedata.currentplanet.numberofstations,
+           gamedata.player.inventory.metal,
+           gamedata.currentplanet.fleet.numberofships,
+           gamedata.currentplanet.fleet.ships[0].health
+          );
+  text_layer_set_text(text_layer, characterarray);
+  warp(&gamedata, 1);
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -26,9 +40,9 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  text_layer = text_layer_create((GRect) { .origin = { 0, 72 }, .size = { bounds.size.w, 20 } });
-  text_layer_set_text(text_layer, "Press a button");
-  text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
+  text_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { bounds.size.w, bounds.size.h } });
+  text_layer_set_text(text_layer, "default");
+  text_layer_set_text_alignment(text_layer, GTextAlignmentLeft);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
 }
 
@@ -37,6 +51,7 @@ static void window_unload(Window *window) {
 }
 
 static void init(void) {
+  initializegame(&gamedata);
   window = window_create();
   window_set_click_config_provider(window, click_config_provider);
   window_set_window_handlers(window, (WindowHandlers) {
@@ -45,6 +60,7 @@ static void init(void) {
   });
   const bool animated = true;
   window_stack_push(window, animated);
+  
 }
 
 static void deinit(void) {
