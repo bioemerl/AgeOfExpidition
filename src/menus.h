@@ -1,14 +1,13 @@
 #pragma once
+
 #include "types.h"
-  
-#define NUMBER_OF_LAYERS 1;
+#define NUMBER_OF_LAYERS 5
 
 //games can run one of two ways
 //turn based-update per press of the button
 //active, with a loop that doesn't ever end
 //turn based will run procedures, then run the update right after
 //update based will run procedures, then run the update inside the loop that updates constantly
-
 
 typedef struct{
   char layertext[100];
@@ -19,9 +18,9 @@ typedef struct{
 } LayerInfo;
 
 typedef struct{
-  int8_t menuisactive;
-  int8_t currentmenu[1]; //THE TOTAL NUMBER OF LAYERS IS ARRAY SIZE
-  LayerInfo layerdata[1]; //CANT USE THE DEFINE FOR SOME ODD REASON, COMPILER WILL GIVE ERROR
+  int8_t menuisactive; //defines if menu is active or not
+  int8_t currentmenu[NUMBER_OF_LAYERS]; //THE TOTAL NUMBER OF LAYERS IS ARRAY SIZE
+  LayerInfo layerdata[NUMBER_OF_LAYERS]; //CANT USE THE DEFINE FOR SOME ODD REASON, COMPILER WILL GIVE ERROR
   int8_t menulayer;
   int8_t uppressed;
   int8_t downpressed;
@@ -50,7 +49,7 @@ typedef struct{
 //block 1.1
 void update_menu_layer(MenuData* menudata, GameData* gamedata); //runs all the code for what buttonpresses do in the menus.
 //block 1.2
-void select_menu_layers(Layer *this_layer, GContext *ctx, MenuData* menudata, int layernumber); //calls draw_menu_layers where needed for menus that have many stacked layers that all need to show up
+void select_menu_layers(Layer *this_layer, GContext *ctx, MenuData* menudata); //calls draw_menu_layers where needed for menus that have many stacked layers that all need to show up
 void draw_menu_layer(Layer *this_layer, GContext *ctx, MenuData* menudata, int menulayernumber); //draws the menu layer with paramaters given  draws layers using drawmenuandbox
 void drawmenuandbox(Layer *this_layer, GContext *ctx, int currentposition, int issquarelayer, int layernumber, int itemscount, int x, int y, int xdiff, int offset, char text[100]); //actually draws menus
 
@@ -60,6 +59,8 @@ void menudownpressproc(MenuData* menudata); //run on the main trigger for down b
 void menuuppressproc(MenuData* menudata);  //run on the main trigger for up button press
 void menuselectpressproc(MenuData* menudata, GameData* gamedata);  //run on the main trigger for select button press
 void menubuttonreleaseproc(MenuData* menudata);  //run on the main trigger for any button release
+void initializemenus(MenuData* menudata);
+void initializemenulayer(int menulayer, MenuData* menudata, int xpos, int ypos, int width, int numberofitems, int numberoftitles, int issquarelayer, char layertext[100]);
 //updatemenuselection will be run only when the procs are run above.
 //void updatemenuselection(GameData* gamedata, int menulayer, int layeritemscount); //updates the selected item on the active layer
 

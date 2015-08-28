@@ -1,14 +1,36 @@
 #include <pebble.h>
 #include "menus.h"
+#include "types.h"
  
 //prototypes
+void layerzeroupdate(MenuData* menudata, GameData* gamedata);
 void layeroneupdate(MenuData* menudata, GameData* gamedata);
 
-void update_menu_layer(MenuData* menudata, GameData* gamedata){
+void initializemenus(MenuData* menudata){
+  menudata->menulayer = 0;
+  menudata->buttonreleased = 1;
+  for(int i = 0; i < NUMBER_OF_LAYERS; i++)
+    menudata->currentmenu[i] = 0; //should be a for loop, for all existing menu layers
+}
+
+void initializemenulayer(int menulayer, MenuData* menudata, int xpos, int ypos, int width, int numberofitems, int numberoftitles, int issquarelayer, char layertext[100]){
+  snprintf(menudata->layerdata[menulayer].layertext, sizeof(menudata->layerdata[menulayer].layertext), layertext);
+  menudata->layerdata[menulayer].xpos = xpos;
+  menudata->layerdata[menulayer].ypos = ypos;
+  menudata->layerdata[menulayer].boxwidth = width;
+  menudata->layerdata[menulayer].numberofitems = numberofitems;
+  menudata->layerdata[menulayer].numberoftitles = numberoftitles;
+  menudata->layerdata[menulayer].issquarelayer = issquarelayer;
+}
+
+
+void update_menu_layer(MenuData* menudata, GameData* gamedata){ //run on click
   switch(menudata->menulayer){
     case 0:
+      layerzeroupdate(menudata, gamedata);
       break;
     case 1:
+      layeroneupdate(menudata, gamedata);
       break;
     case 2:
       break;
@@ -17,40 +39,66 @@ void update_menu_layer(MenuData* menudata, GameData* gamedata){
   }
 }
 
+void layerzeroupdate(MenuData* menudata, GameData* gamedata){
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 0){
+    menudata->menulayer = 1;
+    APP_LOG(APP_LOG_LEVEL_INFO, "one");
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 1){
+    APP_LOG(APP_LOG_LEVEL_INFO, "two");
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 2){
+    APP_LOG(APP_LOG_LEVEL_INFO, "three");
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 3){
+    APP_LOG(APP_LOG_LEVEL_INFO, "four");
+  }
+}
+
 void layeroneupdate(MenuData* menudata, GameData* gamedata){
   if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 0){
-    
+    menudata->menulayer = 0;
+    APP_LOG(APP_LOG_LEVEL_INFO, "onetwo");
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 1){
+    APP_LOG(APP_LOG_LEVEL_INFO, "twotwo");
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 2){
+    APP_LOG(APP_LOG_LEVEL_INFO, "threetwo");
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 3){
+    APP_LOG(APP_LOG_LEVEL_INFO, "fourtwo");
   }
 }
 
 void updatemenuselection(MenuData* menudata){
+  APP_LOG(APP_LOG_LEVEL_INFO, "box %i, buttonreleased is %i", menudata->currentmenu[menudata->menulayer], menudata->buttonreleased);
   if(menudata->downpressed == 1 && menudata->uppressed == 0 && menudata->buttonreleased == 1){
-      menudata->currentmenu[menudata->menulayer] = ((menudata->currentmenu[menudata->menulayer] + 1) % menudata->layerdata[menudata->menulayer].numberofitems);
-      menudata->buttonreleased = 0;
+      APP_LOG(APP_LOG_LEVEL_INFO, "run");
+      menudata->currentmenu[menudata->menulayer] = ((menudata->currentmenu[menudata->menulayer] + 1) % (menudata->layerdata[menudata->menulayer].numberofitems));
   }
   //UP PRESSED
   if(menudata->downpressed == 0 && menudata->uppressed == 1 && menudata->buttonreleased == 1){
-    menudata->currentmenu[menudata->menulayer] = ((menudata->currentmenu[menudata->menulayer] - 1) % menudata->layerdata[menudata->menulayer].numberofitems);
-    menudata->buttonreleased = 0;
+    menudata->currentmenu[menudata->menulayer] = ((menudata->currentmenu[menudata->menulayer] - 1));
     if(menudata->currentmenu[menudata->menulayer] < 0)
       menudata->currentmenu[menudata->menulayer] = menudata->layerdata[menudata->menulayer].numberofitems - 1;
   }
+  menudata->buttonreleased = 0;
 }
 
 
-void select_menu_layers(Layer *this_layer, GContext *ctx, MenuData* menudata, int layernumber){
+void select_menu_layers(Layer *this_layer, GContext *ctx, MenuData* menudata){
   //always draw the base menu
-  if(menudata->menulayer == 0 || menudata->menulayer == 1 || menudata->menulayer == 2)
-    draw_menu_layer(this_layer, ctx, menudata, 0); //the base menu layer
-    draw_menu_layer(this_layer, ctx, menudata, 1);
-    draw_menu_layer(this_layer, ctx, menudata, 2);
-  if(menudata->menulayer == 1)//buysellmenu
+  if(menudata->menulayer == 0 || menudata->menulayer == 1)
+    draw_menu_layer(this_layer, ctx, menudata, 0);
+  if(menudata->menulayer == 1)
     draw_menu_layer(this_layer, ctx, menudata, 1);
 }
 
 
 void draw_menu_layer(Layer *this_layer, GContext *ctx, MenuData* menudata, int menulayernumber){
-  drawmenuandbox(this_layer, ctx, menudata->currentmenu[menulayernumber], menudata->layerdata[menulayernumber].issquarelayer, menulayernumber, menudata->layerdata[menulayernumber].numberoftitles, menudata->layerdata[menulayernumber].xpos, menudata->layerdata[0].ypos, menudata->layerdata[menulayernumber].boxwidth, menudata->layerdata[menulayernumber].numberoftitles, menudata->layerdata[menulayernumber].layertext);
+  layer_mark_dirty(this_layer);
+  drawmenuandbox(this_layer, ctx, menudata->currentmenu[menulayernumber], menudata->layerdata[menulayernumber].issquarelayer, menulayernumber, menudata->layerdata[menulayernumber].numberofitems, menudata->layerdata[menulayernumber].xpos, menudata->layerdata[0].ypos, menudata->layerdata[menulayernumber].boxwidth, menudata->layerdata[menulayernumber].numberoftitles, menudata->layerdata[menulayernumber].layertext);
   switch(menulayernumber){
     case 1: //special things that need to be drawn in a layer will go here
       break;
@@ -64,9 +112,11 @@ void drawmenuandbox(Layer *this_layer, GContext *ctx, int currentposition, int i
   itemscount = itemscount + offset;
   GRect layertext;
   GRect highlightbox;
+  GRect backgroundbox;
   if(issquarelayer == 0){
     highlightbox = (GRect(x, 2 + y+(currentposition + offset)*15 - currentposition, xdiff, 15 )); //highlighting box
-    layertext = GRect(x, y, xdiff, 4 + y+(itemscount - 1)*15 - itemscount);
+    layertext = GRect(x + 2, y, xdiff - 2, 4 + y+(itemscount)*15 - itemscount);
+    backgroundbox = GRect(x-1, y, xdiff + 2, 4 + y+(itemscount)*15 - itemscount - 9);
   }
   else if(issquarelayer == 1){ //if you want to draw a number of boxes
     if((currentposition%(itemscount - offset - 1)) == 0 && currentposition != 0){ //draw the last box as large, if number of items is odd
@@ -76,11 +126,13 @@ void drawmenuandbox(Layer *this_layer, GContext *ctx, int currentposition, int i
       highlightbox = (GRect(x  + (xdiff/2), 2 + y+((currentposition + offset) / 2)*15 - (currentposition/2), (xdiff / 2), 15 ));
     else if(((currentposition + 1)%2 != 0)) //draw box around the first colm of entires
       highlightbox = (GRect(x, 2 + y+((currentposition + offset) / 2)*15 - (currentposition/2), (xdiff / 2), 15 ));
-    layertext = GRect(x, y, xdiff, 4 + y+((itemscount/2 + 1) - 1)*15 - (itemscount/2));
+    backgroundbox = GRect(x - 1, y, xdiff+2, 4 + y+((itemscount/2 + 1))*15 - (itemscount/2) - 9);
+    layertext = GRect(x + 2, y, xdiff - 2, 4 + y+((itemscount/2 + 1))*15 - (itemscount/2));
   }
-  graphics_fill_rect(ctx, layertext, 0, GCornerNone); //background box
-  graphics_draw_rect(ctx, highlightbox); //the box around selected area
+  graphics_fill_rect(ctx, backgroundbox, 0, GCornerNone); //background box
+  graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_draw_text(ctx, text, fonts_get_system_font(FONT_KEY_FONT_FALLBACK), layertext, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_rect(ctx, highlightbox); //the box around selected area
 }
 
 void menudownpressproc(MenuData* menudata){
@@ -99,7 +151,8 @@ void menuselectpressproc(MenuData* menudata, GameData* gamedata){
     update_menu_layer(menudata, gamedata);
 }
 void menubuttonreleaseproc(MenuData* menudata){
+  menudata->uppressed = 0;
+  menudata->downpressed = 0;
+  menudata->selectpressed = 0;
   menudata->buttonreleased = 1;
-  if(menudata->menuisactive == 1)
-    updatemenuselection(menudata);
 }
