@@ -14,3 +14,10 @@ void warp(GameData* gamedata, int planetnumber);
 int random(int seed, int min, int max);
 
 void initializegame(GameData* gamedata);
+
+//drawing and graphics functions
+void drawmainmap(Layer *this_layer, GContext *ctx, GameData* gamedata);
+
+//game process functions
+void uppresshandler(GameData* gamedata);
+void downpresshandler(GameData* gamedata);

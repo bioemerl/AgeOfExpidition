@@ -39,6 +39,7 @@ typedef struct{
 typedef struct{
   Player player;
   Planet currentplanet;
+  int selectedplanet; //-1 is the current planet, 0 to x are the other planets.
   int numberofnewplanets; //a number between 1 and 3
   Planet newplanets[3];
 } GameData;

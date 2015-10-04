@@ -4,8 +4,8 @@
 Planet createplanet(int location){
   Planet newplanet;
   newplanet.planetnumber = location;
-  newplanet.screenposx = random(location, 0, 400);
-  newplanet.screenposy = random(location, 0, 300);
+  newplanet.screenposx = random(location, 15, 129);
+  newplanet.screenposy = random(location, 15, 153);
   newplanet.numberofstations = random(location, 0, 5);
   for(int i = 0; i < newplanet.numberofstations; i++)
     newplanet.stations[i] = createstation(location, i);
@@ -57,6 +57,7 @@ int random(int seed, int min, int max){
 void initializegame(GameData* gamedata){ //load the saved data after running this function
   int time = 1008;
   gamedata->currentplanet = createplanet( random(time, 0, MAX_16_BIT) );
+  gamedata->selectedplanet = 0;
   
   gamedata->player.inventory = createinventory(gamedata->currentplanet.planetnumber, 1);  //eventually have default values
   
@@ -67,9 +68,48 @@ void initializegame(GameData* gamedata){ //load the saved data after running thi
 
 
 void warp(GameData* gamedata, int planetnumber){
+  gamedata->selectedplanet = 0;
   gamedata->currentplanet = gamedata->newplanets[planetnumber];
   gamedata->numberofnewplanets = random(gamedata->currentplanet.planetnumber, 2, 3);
   for(int i = 0; i < gamedata->numberofnewplanets; i++)
     gamedata->newplanets[i] = createplanet( random(gamedata->currentplanet.planetnumber * i, 0, MAX_16_BIT) ); //new planets are based on current seed.
+}
+
+//drawing and graphics functions
+void drawmainmap(Layer *this_layer, GContext *ctx, GameData* gamedata){
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, GRect(0, 0, 150, 200), 0, 0);
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_context_set_stroke_color(ctx, GColorWhite);
+  graphics_draw_circle(ctx, GPoint(gamedata->currentplanet.screenposx, gamedata->currentplanet.screenposy), 10);
+  graphics_fill_circle(ctx, GPoint(gamedata->currentplanet.screenposx, gamedata->currentplanet.screenposy), 3);
+  if(gamedata->selectedplanet == -1){
+    graphics_draw_circle(ctx, GPoint(gamedata->currentplanet.screenposx, gamedata->currentplanet.screenposy), 8);
+  }
+  for(int i = 0; i < gamedata->numberofnewplanets; i++){
+    if(gamedata->selectedplanet == i){
+      graphics_draw_circle(ctx, GPoint(gamedata->newplanets[i].screenposx, gamedata->newplanets[i].screenposy), 8);
+    }
+    graphics_draw_circle(ctx, GPoint(gamedata->newplanets[i].screenposx, gamedata->newplanets[i].screenposy), 10);
+    graphics_draw_line(ctx, GPoint(gamedata->currentplanet.screenposx, gamedata->currentplanet.screenposy), GPoint(gamedata->newplanets[i].screenposx, gamedata->newplanets[i].screenposy));
+  }
+}
+
+
+//game process functions
+void uppresshandler(GameData* gamedata){
+  if(gamedata->selectedplanet < gamedata->numberofnewplanets - 1)
+    gamedata->selectedplanet++;
+  else{
+    gamedata->selectedplanet = -1;
+  }
+}
+
+void downpresshandler(GameData* gamedata){
+  if(gamedata->selectedplanet >= 0)
+    gamedata->selectedplanet--;
+  else{
+    gamedata->selectedplanet = gamedata->numberofnewplanets - 1;
+  }
 }
 

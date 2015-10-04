@@ -6,52 +6,79 @@
 static Window *window;
 static TextLayer *text_layer;
 static GameData gamedata;
+static MenuData menudata;
+static Layer *graphics_canvas_layer;
+
+static void canvas_update_proc(Layer *this_layer, GContext *ctx){
+  //draw the planet points and draw highlighting circle.
+  drawmainmap(this_layer, ctx, &gamedata);
+  select_menu_layers(this_layer, ctx, &menudata); //should check if menu is active on it's own
+}
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  static char characterarray[200];
-  snprintf(characterarray, sizeof(characterarray), 
-           "Newplanets is %i \nPlanetnumber is %i \ncurrentstations is %i \nplayermetal is %i \nplanetfleet is %i \nplanet ship 1 hp %i", 
-           gamedata.numberofnewplanets, 
-           gamedata.currentplanet.planetnumber,
-           gamedata.currentplanet.numberofstations,
-           gamedata.player.inventory.metal,
-           gamedata.currentplanet.fleet.numberofships,
-           gamedata.currentplanet.fleet.ships[0].health
-          );
-  text_layer_set_text(text_layer, characterarray);
-  warp(&gamedata, 1);
+  if(menudata.menuisactive == 0){ //activate menu if it's not active
+    if(gamedata.selectedplanet == -1){
+      menudata.buttonreleased = 0;
+      menudata.menulayer = 0;
+      menudata.menuisactive = 1;
+    }
+    if(gamedata.selectedplanet >= 0){
+      menudata.buttonreleased = 0;
+      menudata.menulayer = 1;
+      menudata.menuisactive = 1;
+    }
+  }
+  
+  layer_mark_dirty(graphics_canvas_layer);
+  menuselectpressproc(&menudata, &gamedata);
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Up");
+  layer_mark_dirty(graphics_canvas_layer);
+  menuuppressproc(&menudata);
+  if(menudata.menuisactive == 0)
+    uppresshandler(&gamedata);
+  
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Down");
+  layer_mark_dirty(graphics_canvas_layer);
+  menudownpressproc(&menudata);
+  if(menudata.menuisactive == 0)
+    downpresshandler(&gamedata);
+}
+
+static void click_release_handler(ClickRecognizerRef recognizer, void *context) {
+  menubuttonreleaseproc(&menudata);
 }
 
 static void click_config_provider(void *context) {
-  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
-  window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
-  window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
+  window_raw_click_subscribe(BUTTON_ID_UP, up_click_handler, click_release_handler, NULL);
+  window_raw_click_subscribe(BUTTON_ID_DOWN, down_click_handler, click_release_handler, NULL);
+  window_raw_click_subscribe(BUTTON_ID_SELECT, select_click_handler, click_release_handler, NULL);
 }
 
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
+  
+  //create and set the update protocol for the canvas to draw on
+  graphics_canvas_layer = layer_create(GRect(0,0,bounds.size.w, bounds.size.h));
+  layer_add_child(window_layer, graphics_canvas_layer);
+  layer_set_update_proc(graphics_canvas_layer, canvas_update_proc);
 
   text_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { bounds.size.w, bounds.size.h } });
   text_layer_set_text(text_layer, "default");
   text_layer_set_text_alignment(text_layer, GTextAlignmentLeft);
-  layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  //layer_add_child(window_layer, text_layer_get_layer(text_layer));
 }
 
 static void window_unload(Window *window) {
   text_layer_destroy(text_layer);
+  layer_destroy(graphics_canvas_layer);
 }
 
 static void init(void) {
-  initializegame(&gamedata);
   window = window_create();
   window_set_click_config_provider(window, click_config_provider);
   window_set_window_handlers(window, (WindowHandlers) {
@@ -60,6 +87,25 @@ static void init(void) {
   });
   const bool animated = true;
   window_stack_push(window, animated);
+  
+  initializegame(&gamedata);
+  initializemenus(&menudata);
+  menudata.menuisactive = 0;
+  
+  char characterarray[100]; //initialize the first menu's data to show accurate numbers for the first planet
+  snprintf(characterarray, sizeof(characterarray), 
+           "Newplanets: %i \nnumber: %i\nstationcnt: %i\npmetal: %i\nplanfleet: %i\nplanship1hp: %i\n--warp--\n--exit--", 
+           gamedata.numberofnewplanets, 
+           gamedata.currentplanet.planetnumber,
+           gamedata.currentplanet.numberofstations,
+           gamedata.player.inventory.metal,
+           gamedata.currentplanet.fleet.numberofships,
+           gamedata.currentplanet.fleet.ships[0].health
+          );
+  
+  //initialize the menu layers.  Remember, ones that have to update should be updated with another function elsewhere.
+  initializemenulayer(0, &menudata, 2, 1, 140, 8, 0, 0, characterarray);
+  initializemenulayer(1, &menudata, 0, 0, 50, 4, 0, 0, "Warp\nIntel\nEvents\nExit");
   
 }
 
