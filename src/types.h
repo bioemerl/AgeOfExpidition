@@ -9,6 +9,7 @@ typedef struct{
 } Inventory;
 
 typedef struct{
+  int stationtype;
   Inventory inventory;
 } Station;
 

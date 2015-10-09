@@ -12,7 +12,7 @@ static Layer *graphics_canvas_layer;
 static void canvas_update_proc(Layer *this_layer, GContext *ctx){
   //draw the planet points and draw highlighting circle.
   drawmainmap(this_layer, ctx, &gamedata);
-  select_menu_layers(this_layer, ctx, &menudata); //should check if menu is active on it's own
+  select_menu_layers(this_layer, ctx, &menudata, &gamedata); //should check if menu is active on it's own
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -92,20 +92,17 @@ static void init(void) {
   initializemenus(&menudata);
   menudata.menuisactive = 0;
   
-  char characterarray[100]; //initialize the first menu's data to show accurate numbers for the first planet
+  /*char characterarray[100]; //initialize the first menu's data to show accurate numbers for the first planet
   snprintf(characterarray, sizeof(characterarray), 
-           "Newplanets: %i \nnumber: %i\nstationcnt: %i\npmetal: %i\nplanfleet: %i\nplanship1hp: %i\n--warp--\n--exit--", 
-           gamedata.numberofnewplanets, 
+           "Planet: %i \nAntimatter: %i\nStations:\nInventory:\nFleets:\nEvents:\n--Exit--",  
            gamedata.currentplanet.planetnumber,
-           gamedata.currentplanet.numberofstations,
-           gamedata.player.inventory.metal,
-           gamedata.currentplanet.fleet.numberofships,
-           gamedata.currentplanet.fleet.ships[0].health
-          );
+           gamedata.player.inventory.antimatter
+          );*/
   
   //initialize the menu layers.  Remember, ones that have to update should be updated with another function elsewhere.
-  initializemenulayer(0, &menudata, 2, 1, 140, 8, 0, 0, characterarray);
-  initializemenulayer(1, &menudata, 0, 0, 50, 4, 0, 0, "Warp\nIntel\nEvents\nExit");
+  initializemenulayer(0, &menudata, 2, 1, 77, 5, 2, 0, "Error:\nYou\nShouldnot\nSeeThis");
+  initializemenulayer(1, &menudata, 0, 0, 50, 3, 0, 0, "Warp\nEvents\nExit");
+  initializemenulayer(2, &menudata, 0, 0, 50, 4, 0, 0, "Error:\nYou\nShouldnot\nSeeThis");
   
 }
 

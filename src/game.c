@@ -23,6 +23,7 @@ Fleet createfleet(int location){
 
 Station createstation(int location, int stationnumber){
   Station newstation;
+  newstation.stationtype = random(location + stationnumber, 0, 3);
   newstation.inventory = createinventory(location, stationnumber);
   return newstation;
 }
@@ -41,7 +42,7 @@ Ship createship(int location, int shipnumber){
   newship.health = random(location + shipnumber, 50, 100);
   newship.type = random(location + shipnumber, 1, 2);
   return newship;
-} 
+}
 
 int random(int seed, int min, int max){ 
   if(max == 0)
@@ -68,11 +69,17 @@ void initializegame(GameData* gamedata){ //load the saved data after running thi
 
 
 void warp(GameData* gamedata, int planetnumber){
-  gamedata->selectedplanet = 0;
-  gamedata->currentplanet = gamedata->newplanets[planetnumber];
-  gamedata->numberofnewplanets = random(gamedata->currentplanet.planetnumber, 2, 3);
-  for(int i = 0; i < gamedata->numberofnewplanets; i++)
-    gamedata->newplanets[i] = createplanet( random(gamedata->currentplanet.planetnumber * i, 0, MAX_16_BIT) ); //new planets are based on current seed.
+  if(gamedata->player.inventory.antimatter >= 5){
+    gamedata->player.inventory.antimatter -= 5;
+    gamedata->selectedplanet = 0;
+    gamedata->currentplanet = gamedata->newplanets[planetnumber];
+    gamedata->numberofnewplanets = random(gamedata->currentplanet.planetnumber, 2, 3);
+    for(int i = 0; i < gamedata->numberofnewplanets; i++)
+      gamedata->newplanets[i] = createplanet( random(gamedata->currentplanet.planetnumber * i, 0, MAX_16_BIT) ); //new planets are based on current seed
+  }
+  else{
+    //some sort of menu that says "antimatter needed" should pop up here.
+  }
 }
 
 //drawing and graphics functions
@@ -98,18 +105,18 @@ void drawmainmap(Layer *this_layer, GContext *ctx, GameData* gamedata){
 
 //game process functions
 void uppresshandler(GameData* gamedata){
-  if(gamedata->selectedplanet < gamedata->numberofnewplanets - 1)
-    gamedata->selectedplanet++;
-  else{
-    gamedata->selectedplanet = -1;
-  }
-}
-
-void downpresshandler(GameData* gamedata){
   if(gamedata->selectedplanet >= 0)
     gamedata->selectedplanet--;
   else{
     gamedata->selectedplanet = gamedata->numberofnewplanets - 1;
+  }
+}
+
+void downpresshandler(GameData* gamedata){
+  if(gamedata->selectedplanet < gamedata->numberofnewplanets - 1)
+    gamedata->selectedplanet++;
+  else{
+    gamedata->selectedplanet = -1;
   }
 }
 
