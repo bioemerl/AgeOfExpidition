@@ -24,11 +24,18 @@ typedef struct{
 } Fleet;
 
 typedef struct{
+  int16_t minuitesleft;
+  int8_t eventtype;
+  int8_t eventduration;
+} Event;
+
+typedef struct{
   int planetnumber; //used as location seed
   int screenposx;
   int screenposy;
   int numberofstations;
   Station stations[5];
+  Event events[3];
   Fleet fleet;
 } Planet;
 
@@ -44,7 +51,6 @@ typedef struct{
   int numberofnewplanets; //a number between 1 and 3
   Planet newplanets[3];
 } GameData;
-
 
 
 //what to do

@@ -101,8 +101,11 @@ static void init(void) {
   
   //initialize the menu layers.  Remember, ones that have to update should be updated with another function elsewhere.
   initializemenulayer(0, &menudata, 2, 1, 77, 5, 2, 0, "Error:\nYou\nShouldnot\nSeeThis");
-  initializemenulayer(1, &menudata, 0, 0, 50, 3, 0, 0, "Warp\nEvents\nExit");
+  initializemenulayer(1, &menudata, 0, 0, 50, 3, 1, 0, "Planet #\nWarp\nEvents\nExit");
   initializemenulayer(2, &menudata, 0, 0, 50, 4, 0, 0, "Error:\nYou\nShouldnot\nSeeThis");
+  initializemenulayer(3, &menudata, 0, 0, 75, 4, 0, 0, "Error:\nYou\nShouldnot\nSeeThis");
+  initializemenulayer(4, &menudata, 0, 0, 50, 3, 0, 0, "Player:\nOther:\n-Back-");
+  initializemenulayer(5, &menudata, 0, 0, 50, 4, 0, 0, "you\nshould\nnot\nsee\nthis"); //events layer
   
 }
 

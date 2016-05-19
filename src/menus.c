@@ -6,6 +6,10 @@
 #define STATIONCIVILIAN 1
 #define STATIONMILITARY 2
 #define STATIONWARP 3
+#define EVENTSALE 0
+#define EVENTWAR 1
+#define EVENTRAID 2
+#define EVENTPLAUGE 3
   
   
   
@@ -13,12 +17,15 @@
 void layerzeroupdate(MenuData* menudata, GameData* gamedata);
 void layeroneupdate(MenuData* menudata, GameData* gamedata);
 void layertwoupdate(MenuData* menudata, GameData* gamedata);
+void layerthreeupdate(MenuData* menudata, GameData* gamedata);
+void layerfourupdate(MenuData* menudata, GameData* gamedata);
+void layerfiveupdate(MenuData* menudata, GameData* gamedata);
 
 void initializemenus(MenuData* menudata){
   menudata->menulayer = 0;
   menudata->buttonreleased = 1;
-  for(int i = 0; i < NUMBER_OF_LAYERS; i++)
-    menudata->currentmenu[i] = 0; //should be a for loop, for all existing menu layers
+  for(int i = 0; i < NUMBER_OF_LAYERS; i++) //initialize the current cursor to 0 for all layers
+    menudata->currentmenu[i] = 0;
 }
 
 void initializemenulayer(int menulayer, MenuData* menudata, int xpos, int ypos, int width, int numberofitems, int numberoftitles, int issquarelayer, char layertext[MAX_LAYER_TEXT]){
@@ -36,7 +43,6 @@ void setmenulayertext(int menulayer, MenuData* menudata, char layertext[MAX_LAYE
 }
 
 void update_menu_layer(MenuData* menudata, GameData* gamedata){ //run on click
-  APP_LOG(APP_LOG_LEVEL_INFO, "UPDATEMENULAYER HERE! %i", menudata->menulayer);
   switch(menudata->menulayer){
     case 0:
       layerzeroupdate(menudata, gamedata);
@@ -45,15 +51,21 @@ void update_menu_layer(MenuData* menudata, GameData* gamedata){ //run on click
       layeroneupdate(menudata, gamedata);
       break;
     case 2:
-      APP_LOG(APP_LOG_LEVEL_INFO, "CASETWO HERE!");
       layertwoupdate(menudata, gamedata);
       break;
     case 3:
+      layerthreeupdate(menudata, gamedata);
+      break;
+    case 4:
+      layerfourupdate(menudata, gamedata);
+      break;
+    case 5:
+      layerfiveupdate(menudata, gamedata);
       break;
   }
 }
 
-void layerzeroupdate(MenuData* menudata, GameData* gamedata){
+void layerzeroupdate(MenuData* menudata, GameData* gamedata){ //self planet menu
   char characterarray[MAX_LAYER_TEXT];
   snprintf(characterarray, sizeof(characterarray), //update the text of the layer
            "Planet: %i \nAntimatter: %i\nStations:\nInventory:\nFleets:\nEvents:\n--Exit--",  
@@ -65,20 +77,43 @@ void layerzeroupdate(MenuData* menudata, GameData* gamedata){
     menudata->currentmenu[0] = 0;
     menudata->menulayer = 2;
   }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 1){
+    menudata->currentmenu[0] = 0;
+    menudata->menulayer = 3;
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 2){
+    menudata->currentmenu[0] = 0;
+    menudata->menulayer = 4;
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 3){
+    menudata->currentmenu[0] = 0;
+    menudata->menulayer = 5;
+  }
   if(menudata->selectpressed == 1 && menudata->currentmenu[0] == 4){
     menudata->currentmenu[0] = 0;
     menudata->menuisactive = 0;
   }
 }
 
-void layeroneupdate(MenuData* menudata, GameData* gamedata){
+void layeroneupdate(MenuData* menudata, GameData* gamedata){ //other planet menu
+  //--
+  //Update the menu
+  //--
+    char characterarray[MAX_LAYER_TEXT];
+  snprintf(characterarray, sizeof(characterarray), //update the text of the layer
+           "%i\nWarp\nEvents:\n--Exit--",  
+           gamedata->newplanets[gamedata->selectedplanet].planetnumber
+          );
+  setmenulayertext(1, menudata, characterarray);
+  //--
   if(menudata->selectpressed == 1 && menudata->currentmenu[1] == 0 && menudata->buttonreleased == 1){
     warp(gamedata, gamedata->selectedplanet);
     menudata->currentmenu[1] = 0;
     menudata->menuisactive = 0;
   }
   if(menudata->selectpressed == 1 && menudata->currentmenu[1] == 1){
-    APP_LOG(APP_LOG_LEVEL_INFO, "Events");
+    menudata->currentmenu[1] = 0;
+    menudata->menulayer = 5;
   }
   if(menudata->selectpressed == 1 && menudata->currentmenu[1] == 2){
     menudata->currentmenu[1] = 0;
@@ -86,7 +121,7 @@ void layeroneupdate(MenuData* menudata, GameData* gamedata){
   }
 }
 
-void layertwoupdate(MenuData* menudata, GameData* gamedata){
+void layertwoupdate(MenuData* menudata, GameData* gamedata){ //stations menu
   //---
   //update the text, size, and so on, of the layer, to show the correct # of stations
   //---
@@ -128,6 +163,109 @@ void layertwoupdate(MenuData* menudata, GameData* gamedata){
   }
 }
 
+void layerthreeupdate(MenuData* menudata, GameData* gamedata){ //self inventory check menu
+  //---
+  //update the menu
+  //---
+  char menutext[100];
+  snprintf(menutext, sizeof(menutext), "Metal: %i\nFood: %i\nAntimatter: %i\n-Back-", gamedata->player.inventory.metal, gamedata->player.inventory.food, gamedata->player.inventory.antimatter); //update this later with real resources
+  setmenulayertext(3, menudata, menutext);
+  //---
+  //The button code
+  //---
+  if(menudata->selectpressed == 1 && menudata->currentmenu[3] == 0 && menudata->buttonreleased == 1){
+    
+  } 
+  if(menudata->selectpressed == 1 && menudata->currentmenu[3] == 1){
+    
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[3] == 3){
+    menudata->currentmenu[3] = 0;
+    menudata->menulayer = 0;
+  } 
+}
+
+void layerfourupdate(MenuData* menudata, GameData* gamedata){  //fleets menu
+  //first option "player"
+  //second option "other"
+  //third option "back"
+  if(menudata->selectpressed == 1 && menudata->currentmenu[4] == 0 && menudata->buttonreleased == 1){
+    
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[4] == 2){
+    menudata->currentmenu[4] = 0;
+    menudata->menulayer = 0;
+  }
+}
+
+void layerfiveupdate(MenuData* menudata, GameData* gamedata){ //events menu
+  //initialize the events
+  Event events[3];
+  if(gamedata->selectedplanet == -1){
+    for(int i = 0; i < 3; i++)
+      events[i] = gamedata->currentplanet.events[i];
+  }
+  else{
+    for(int i = 0; i < 3; i++)
+      events[i] = gamedata->newplanets[gamedata->selectedplanet].events[i];
+  }
+  
+  //selectedplanet
+  //-1 is current planet, 0 to 3 are the others
+  char eventnames[3][10];
+  for(int i = 0; i < 3; i++){
+    if(events[i].eventtype == EVENTSALE)
+      snprintf(eventnames[i], sizeof(eventnames[i]), "Sale\n");
+    else if(events[i].eventtype == EVENTWAR)
+      snprintf(eventnames[i], sizeof(eventnames[i]), "War\n");
+    else if(events[i].eventtype == EVENTRAID)
+      snprintf(eventnames[i], sizeof(eventnames[i]), "Raid\n");
+    else if(events[i].eventtype == EVENTPLAUGE)
+      snprintf(eventnames[i], sizeof(eventnames[i]), "Plague\n");
+    else
+      snprintf(eventnames[i], sizeof(eventnames[i]), "Err\n");
+  }
+  char menu[40] = {};
+  for(int i = 0; i < 3; i++){
+    strcat(menu, eventnames[i]);
+  }
+  strcat(menu, "-Back-");
+  setmenulayertext(5, menudata, menu);
+  
+  if(menudata->selectpressed == 1 && menudata->currentmenu[5] == 0 && menudata->buttonreleased == 1){
+    
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[5] == 1){
+    
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[5] == 2){
+    
+  }
+  if(menudata->selectpressed == 1 && menudata->currentmenu[5] == 3){
+    //if selected planet is -1 return to current planet menu
+    //else return to other planet menu
+    if(gamedata->selectedplanet == -1){
+      menudata->currentmenu[5] = 0;
+      menudata->menulayer = 0;
+    }
+    else{
+      menudata->currentmenu[5] = 0;
+      menudata->menulayer = 1;
+    }
+  }
+  
+  
+}
+
+void layersixupdate(MenuData* menudata, GameData* gamedata){ //events info menu
+  //show the name of event as title
+  //time until event starts in hours/mins
+  //time the event will last in hours/mins
+  
+  
+  
+}
+
 void updatemenuselection(MenuData* menudata){
   APP_LOG(APP_LOG_LEVEL_INFO, "box %i, buttonreleased is %i", menudata->currentmenu[menudata->menulayer], menudata->buttonreleased);
   if(menudata->downpressed == 1 && menudata->uppressed == 0 && menudata->buttonreleased == 1){
@@ -154,6 +292,12 @@ void select_menu_layers(Layer *this_layer, GContext *ctx, MenuData* menudata, Ga
       draw_menu_layer(this_layer, ctx, menudata, 1);
     if(menudata->menulayer == 2)
       draw_menu_layer(this_layer, ctx, menudata, 2);
+    if(menudata->menulayer == 3)
+      draw_menu_layer(this_layer, ctx, menudata, 3);
+    if(menudata->menulayer == 4)
+      draw_menu_layer(this_layer, ctx, menudata, 4);
+    if(menudata->menulayer == 5)
+      draw_menu_layer(this_layer, ctx, menudata, 5);
 
   }
 }
@@ -168,6 +312,12 @@ void draw_menu_layer(Layer *this_layer, GContext *ctx, MenuData* menudata, int m
     case 1: //special things that need to be drawn in a layer will go here
       break;
     case 2: //special things that need to be drawn in a layer will go here
+      break;
+    case 3:
+      break;
+    case 4:
+      break;
+    case 5:
       break;
   }
 }
@@ -197,7 +347,7 @@ void drawmenuandbox(Layer *this_layer, GContext *ctx, int currentposition, int i
   }
   graphics_fill_rect(ctx, backgroundbox, 0, GCornerNone); //background box
   graphics_context_set_stroke_color(ctx, GColorWhite);
-  graphics_draw_text(ctx, text, fonts_get_system_font(FONT_KEY_FONT_FALLBACK), layertext, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, text, fonts_get_system_font(FONT_KEY_GOTHIC_14), layertext, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   graphics_draw_rect(ctx, highlightbox); //the box around selected area
 }
 

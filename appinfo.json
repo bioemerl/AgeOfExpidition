@@ -4,6 +4,7 @@
         ""
     ],
     "companyName": "cromo_man94@yahoo.com",
+    "enableMultiJS": true,
     "longName": "AgeOfExpidition",
     "projectType": "native",
     "resources": {
@@ -11,6 +12,9 @@
     },
     "sdkVersion": "3",
     "shortName": "AgeOfExpidition",
+    "targetPlatforms": [
+        "basalt"
+    ],
     "uuid": "7dfe9120-c365-4111-ae32-4ad43806c04f",
     "versionLabel": "1.0",
     "watchapp": {

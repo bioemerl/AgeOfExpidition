@@ -7,6 +7,7 @@ Fleet createfleet(int location); //called by create planet
 Station createstation(int location, int stationnumber);
 Inventory createinventory(int location, int inventorynumber); //called by createstation
 Ship createship(int location, int shipnumber); //called by createfleet, or by createstation
+Event createevent(int timeseed, int number);
 
 //function that regens world based on current planet, and moves from the current planet to a new planet
 void warp(GameData* gamedata, int planetnumber);
@@ -17,6 +18,8 @@ void initializegame(GameData* gamedata);
 
 //drawing and graphics functions
 void drawmainmap(Layer *this_layer, GContext *ctx, GameData* gamedata);
+
+int loadsavedata(GameData* gamedata); //loads savedata, returns 0 if no data exists
 
 //game process functions
 void uppresshandler(GameData* gamedata);

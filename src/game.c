@@ -9,6 +9,8 @@ Planet createplanet(int location){
   newplanet.numberofstations = random(location, 0, 5);
   for(int i = 0; i < newplanet.numberofstations; i++)
     newplanet.stations[i] = createstation(location, i);
+  for(int i = 0; i < 3; i++) //create events based on time, not location, so events always vary
+    newplanet.events[i] = createevent(time(NULL) - location, i);
   newplanet.fleet = createfleet(location);
   return newplanet;
 }
@@ -55,18 +57,23 @@ int random(int seed, int min, int max){
   return seed;
 }
 
-void initializegame(GameData* gamedata){ //load the saved data after running this function
-  int time = 1008;
-  gamedata->currentplanet = createplanet( random(time, 0, MAX_16_BIT) );
-  gamedata->selectedplanet = 0;
-  
-  gamedata->player.inventory = createinventory(gamedata->currentplanet.planetnumber, 1);  //eventually have default values
-  
-  gamedata->numberofnewplanets = random(gamedata->currentplanet.planetnumber, 2, 3);
-  for(int i = 0; i < gamedata->numberofnewplanets; i++)
-    gamedata->newplanets[i] = createplanet( random(gamedata->currentplanet.planetnumber * i, 0, MAX_16_BIT) ); //new planets are based on current seed.
+int loadsavedata(GameData* gamedata){
+  return 0;
 }
 
+void initializegame(GameData* gamedata){ //load the saved data after running this function
+  if(loadsavedata(gamedata) == 0){
+    time_t newtime = time(NULL);
+    int time = (int)newtime;
+    gamedata->currentplanet = createplanet( random(time, 0, MAX_16_BIT) );
+    gamedata->selectedplanet = 0;
+    gamedata->player.inventory = createinventory(gamedata->currentplanet.planetnumber, 1);  //eventually have default values
+    
+    gamedata->numberofnewplanets = random(gamedata->currentplanet.planetnumber, 2, 3);
+    for(int i = 0; i < gamedata->numberofnewplanets; i++)
+      gamedata->newplanets[i] = createplanet( random(gamedata->currentplanet.planetnumber * i, 0, MAX_16_BIT) ); //new planets are based on current seed.
+  }
+}
 
 void warp(GameData* gamedata, int planetnumber){
   if(gamedata->player.inventory.antimatter >= 5){
@@ -118,5 +125,14 @@ void downpresshandler(GameData* gamedata){
   else{
     gamedata->selectedplanet = -1;
   }
+}
+
+Event createevent(int timeseed, int number){
+  Event newevent;
+  newevent.minuitesleft = random(timeseed + (number * 23) + 1, 10, 5000);
+  newevent.eventtype = random(timeseed + (number * 23) + 2, 0, 3);
+  newevent.eventduration = random(timeseed + (number * 23) + 3, 0, 300);
+  time_t x = time(NULL);
+  return newevent;
 }
 
